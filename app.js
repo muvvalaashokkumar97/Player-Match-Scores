@@ -73,7 +73,7 @@ app.get("/matches/:matchId/", async (request, response) => {
 
 app.get("/players/:playerId/matches/", async (request, response) => {
   const { playerId } = request.params;
-  const queryResult = `select * from player_match_score inner join match_details on player_match_score.match_id = match_details.match_id where player_match_score.player_id = ${playerId}`;
+  const queryResult = `select * from player_match_score natural join match_details where player_id = ${playerId}`;
   const getPlayers = await db.all(queryResult);
   const matchDetails = getPlayers.map((playerMatch) => {
     return {
@@ -87,7 +87,7 @@ app.get("/players/:playerId/matches/", async (request, response) => {
 
 app.get("/matches/:matchId/players/", async (request, response) => {
   const { matchId } = request.params;
-  const queryResult = `select * from player_details inner join player_match_score on player_details.player_id = player_match_score.player_id where player_match_score.match_id = ${matchId}`;
+  const queryResult = `select * from player_details natural join player_match_score where match_id = ${matchId}`;
   const getPlayers = await db.all(queryResult);
   const playerDetails = getPlayers.map((player) => {
     return {
@@ -101,21 +101,15 @@ app.get("/matches/:matchId/players/", async (request, response) => {
 app.get("/players/:playerId/playerScores/", async (request, response) => {
   const { playerId } = request.params;
   const queryResult = `select
-      player_details.player_id as playerId,
-      player_details.player_name as playerName,
-      sum(score),
-      sum(fours),
-      sum(sixes)
-      from player_details inner join player_match_score on player_details.player_id = player_match_score.player_id
-      where player_details.player_id = ${playerId}`;
+      player_id as playerId,
+      player_name as playerName,
+      sum(score) as totalScore,
+      sum(fours) as totalFours,
+      sum(sixes) as totalSixes
+      from player_details natural join player_match_score 
+      where player_id = ${playerId}`;
   const getPlayerScores = await db.get(queryResult);
-  response.send({
-    playerId: getPlayerScores.playerId,
-    playerName: getPlayerScores.playerName,
-    totalScore: getPlayerScores["sum(score)"],
-    totalFours: getPlayerScores["sum(fours)"],
-    totalSixes: getPlayerScores["sum(sixes)"],
-  });
+  response.send(getPlayerScores);
 });
 
 module.exports = app;
