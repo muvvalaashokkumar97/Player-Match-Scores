@@ -1,0 +1,26 @@
+###
+
+get http://localhost:8080/players/
+
+###
+get http://localhost:8080/players/5/
+
+###
+put http://localhost:8080/players/5/
+Content-Type: application/json
+
+{
+  "playerName": "Raju"
+}
+
+###
+get http://localhost:8080/matches/5/
+
+###
+get http://localhost:8080/players/1/matches
+
+###
+get http://localhost:8080/matches/1/players
+
+###
+get http://localhost:8080/players/1/playerScores
